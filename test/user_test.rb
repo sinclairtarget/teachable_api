@@ -79,11 +79,7 @@ module Teachable
     # User Refresh
     # =================================================================
     def test_can_refresh_authenticated_user
-      user = User.new USER_CREDENTIALS[:email]
-      
-      VCR.use_cassette('sign_in') do
-        user.authenticate! USER_CREDENTIALS[:password]
-      end
+      user = authenticated_user
 
       VCR.use_cassette('refresh') do
         user.refresh!
@@ -104,11 +100,7 @@ module Teachable
     # Order Listing
     # =================================================================
     def test_can_list_orders
-      user = User.new USER_CREDENTIALS[:email]
-      
-      VCR.use_cassette('sign_in') do
-        user.authenticate! USER_CREDENTIALS[:password]
-      end
+      user = authenticated_user
 
       VCR.use_cassette('orders') do
         orders = user.orders
@@ -153,11 +145,7 @@ module Teachable
     }.freeze
 
     def test_can_add_order
-      user = User.new USER_CREDENTIALS[:email]
-
-      VCR.use_cassette('sign_in') do
-        user.authenticate! USER_CREDENTIALS[:password]
-      end
+      user = authenticated_user
 
       VCR.use_cassette('add_order') do
         order = user.add_order(**TEST_ORDER)
@@ -181,11 +169,7 @@ module Teachable
     end
 
     def test_can_add_order_without_special_instructions
-      user = User.new USER_CREDENTIALS[:email]
-
-      VCR.use_cassette('sign_in') do
-        user.authenticate! USER_CREDENTIALS[:password]
-      end
+      user = authenticated_user
 
       VCR.use_cassette('add_order_without_special_instructions') do
         unspecial_order = TEST_ORDER.dup
@@ -200,11 +184,7 @@ module Teachable
     end
 
     def test_missing_total_raises_validation_error
-      user = User.new USER_CREDENTIALS[:email]
-
-      VCR.use_cassette('sign_in') do
-        user.authenticate! USER_CREDENTIALS[:password]
-      end
+      user = authenticated_user
 
       VCR.use_cassette('add_order_missing_total') do
         assert_raises ValidationError do
@@ -214,11 +194,7 @@ module Teachable
     end
 
     def test_missing_total_quantity_raises_validation_error
-      user = User.new USER_CREDENTIALS[:email]
-
-      VCR.use_cassette('sign_in') do
-        user.authenticate! USER_CREDENTIALS[:password]
-      end
+      user = authenticated_user
 
       VCR.use_cassette('add_order_missing_total_quantity') do
         assert_raises ValidationError do
@@ -346,6 +322,20 @@ module Teachable
           )
         end
       end
+    end
+
+    protected
+    
+    def authenticated_user
+      @_authenticated_user if defined?(:@_authenticated_user)
+
+      @_authenticated_user = User.new USER_CREDENTIALS[:email]
+
+      VCR.use_cassette('sign_in') do
+        @_authenticated_user.authenticate! USER_CREDENTIALS[:password]
+      end
+
+      @_authenticated_user
     end
   end
 end
