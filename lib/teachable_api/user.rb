@@ -1,8 +1,12 @@
 require_relative 'order'
+require_relative 'util'
 
 # Represents a user or potential user of the mock Teachable API.
 module Teachable
   class User
+    include Util
+    extend Util
+
     attr_reader :id, :token, :created_at, :updated_at
 
     def initialize(email)
@@ -143,13 +147,5 @@ module Teachable
         raise Teachable::Error, 'Unknown response.'
       end
     end
-  end
-end
-
-class Object
-  protected
-
-  def raise_if_blank(str, name)
-    raise ArgumentError, "#{name} cannot be blank" if str.nil? || str.empty?
   end
 end
