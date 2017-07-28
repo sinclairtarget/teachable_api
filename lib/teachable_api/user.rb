@@ -91,6 +91,24 @@ module Teachable
       end
     end
 
+    def remove_order(order)
+      resp = API.connection.delete "api/orders/#{order.id}", {
+        user_email: @email,
+        user_token: @token
+      }
+
+      case resp.status
+      when 204
+        order
+      when 401
+        raise Teachable::AuthError, resp.body['error']
+      when 404
+        nil
+      else
+        raise Teachable::Error, 'Unknown response.'
+      end
+    end
+
     def refresh_from_user_response(resp)
       @id = resp.body['id']
       @token = resp.body['tokens']

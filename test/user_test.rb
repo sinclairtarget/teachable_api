@@ -202,6 +202,52 @@ module Teachable
         end
       end
     end
+    
+    # =================================================================
+    # Order Deletion
+    # =================================================================
+    def test_can_remove_order
+      user = authenticated_user
+
+      VCR.use_cassette('remove_order') do
+        orders_at_start = user.orders
+
+        order_to_remove = orders_at_start.first
+        removed_order = user.remove_order(order_to_remove)
+
+        refute_nil removed_order
+        assert_equal order_to_remove.id, removed_order.id
+
+        orders_at_end = user.orders
+        assert_equal 1, orders_at_start.length - orders_at_end.length
+      end
+    end
+
+    def test_cannot_remove_order_with_unauthed_user
+      authed_user = authenticated_user
+      user = User.new USER_CREDENTIALS[:email]
+
+      VCR.use_cassette('remove_order_without_auth') do
+        order_to_remove = authed_user.orders.first
+        assert_raises AuthError do
+          user.remove_order(order_to_remove)
+        end
+      end
+    end
+
+    def test_removing_nonexistent_order_returns_false
+      user = authenticated_user
+
+      VCR.use_cassette('remove_nonexistent_order') do
+        order_to_remove = Order.new({
+          id: 123456789,
+          total: '3.0',
+          total_quantity: 3
+        })
+
+        assert_nil user.remove_order(order_to_remove)
+      end
+    end
 
     # =================================================================
     # Registration
