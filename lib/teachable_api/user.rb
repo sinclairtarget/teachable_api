@@ -44,12 +44,6 @@ module Teachable
       end
     end
 
-    protected 
-
-    def raise_if_blank(str, name)
-      raise ArgumentError, "#{name} cannot be blank" if str.nil? || str.empty?
-    end
-
     def refresh_from_user_response(resp)
       @id = resp.body['id']
       @token = resp.body['tokens']
@@ -57,5 +51,40 @@ module Teachable
       @updated_at = resp.body['updated_at']
       self
     end
+
+    def self.register(email:, password:, password_confirmation:)
+      raise_if_blank email, 'email'
+      raise_if_blank password, 'password'
+      raise_if_blank password_confirmation, 'password_confirmation'
+
+      resp = API.connection.post 'users', {
+        user: {
+          email: email,
+          password: password,
+          password_confirmation: password_confirmation
+        }
+      }
+      case resp.status
+      when 201
+        user = User.new email
+        user.refresh_from_user_response resp
+      when 422
+        messages = resp.body['errors'].map do |field, msgs|
+          "#{field} #{msgs.join(', ')}"
+        end
+        message = messages.join('; ')
+        raise Teachable::ValidationError, message
+      else
+        raise Teachable::Error, 'Unknown response.'
+      end
+    end
+  end
+end
+
+class Object
+  protected
+
+  def raise_if_blank(str, name)
+    raise ArgumentError, "#{name} cannot be blank" if str.nil? || str.empty?
   end
 end

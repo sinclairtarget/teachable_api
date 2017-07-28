@@ -1,0 +1,52 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://fast-bayou-75985.herokuapp.com/users
+    body:
+      encoding: UTF-8
+      string: '{"user":{"email":"notanemail","password":"password","password_confirmation":"password"}}'
+    headers:
+      Accept:
+      - application/json
+      User-Agent:
+      - Faraday v0.12.2
+      Content-Type:
+      - application/json
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 422
+      message: 'Unprocessable Entity '
+    headers:
+      Connection:
+      - keep-alive
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      Content-Type:
+      - application/json; charset=utf-8
+      Cache-Control:
+      - no-cache
+      X-Request-Id:
+      - 8076480a-5d91-42e8-a5a8-d5fcf1a8d7c3
+      X-Runtime:
+      - '0.102856'
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.2.4/2015-12-16)
+      Date:
+      - Fri, 28 Jul 2017 01:42:53 GMT
+      Content-Length:
+      - '35'
+      Via:
+      - 1.1 vegur
+    body:
+      encoding: UTF-8
+      string: '{"errors":{"email":["is invalid"]}}'
+    http_version: 
+  recorded_at: Fri, 28 Jul 2017 01:42:53 GMT
+recorded_with: VCR 3.0.3

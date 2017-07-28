@@ -97,5 +97,126 @@ module Teachable
         end
       end
     end
+
+    # =================================================================
+    # Registration
+    # =================================================================
+    def test_can_register_user
+      VCR.use_cassette('registration') do
+        u = User.register(
+          email: USER_CREDENTIALS[:email],
+          password: USER_CREDENTIALS[:password],
+          password_confirmation: USER_CREDENTIALS[:password]
+        )
+        
+        refute_nil u
+        refute_nil u.token
+      end
+    end
+    
+    def test_must_provide_email
+      VCR.use_cassette('registration') do
+        assert_raises ArgumentError do
+          User.register(
+            password: USER_CREDENTIALS[:password],
+            password_confirmation: USER_CREDENTIALS[:password]
+          )
+        end
+
+        assert_raises ArgumentError do
+          User.register(
+            email: nil,
+            password: USER_CREDENTIALS[:password],
+            password_confirmation: USER_CREDENTIALS[:password]
+          )
+        end
+
+        assert_raises ArgumentError do
+          User.register(
+            email: '',
+            password: USER_CREDENTIALS[:password],
+            password_confirmation: USER_CREDENTIALS[:password]
+          )
+        end
+      end
+    end
+
+    def test_must_provide_password
+      VCR.use_cassette('registration') do
+        assert_raises ArgumentError do
+          User.register(
+            email: USER_CREDENTIALS[:email],
+            password_confirmation: USER_CREDENTIALS[:password]
+          )
+        end
+
+        assert_raises ArgumentError do
+          User.register(
+            email: USER_CREDENTIALS[:email],
+            password: nil,
+            password_confirmation: USER_CREDENTIALS[:password]
+          )
+        end
+
+        assert_raises ArgumentError do
+          User.register(
+            email: USER_CREDENTIALS[:email],
+            password: '',
+            password_confirmation: USER_CREDENTIALS[:password]
+          )
+        end
+      end
+    end
+
+    def test_must_provide_password_confirmation
+      VCR.use_cassette('registration') do
+        assert_raises ArgumentError do
+          User.register(
+            email: USER_CREDENTIALS[:email],
+            password: USER_CREDENTIALS[:password]
+          )
+        end
+
+        assert_raises ArgumentError do
+          User.register(
+            email: USER_CREDENTIALS[:email],
+            password: USER_CREDENTIALS[:password],
+            password_confirmation: nil
+          )
+        end
+
+        assert_raises ArgumentError do
+          User.register(
+            email: USER_CREDENTIALS[:email],
+            password: USER_CREDENTIALS[:password],
+            password_confirmation: ''
+          )
+        end
+      end
+    end
+
+    def test_bad_confirmation_raises_error
+      VCR.use_cassette('registration_bad_confirmation') do
+        assert_raises ValidationError do
+          User.register(
+            email: USER_CREDENTIALS[:email],
+            password: USER_CREDENTIALS[:password],
+            password_confirmation: USER_CREDENTIALS[:password]
+          )
+        end
+      end
+    end
+
+    def test_bad_email_raises_error
+      VCR.use_cassette('registration_bad_email') do
+        assert_raises ValidationError do
+          User.register(
+            email: 'notanemail',
+            password: USER_CREDENTIALS[:password],
+            password_confirmation: USER_CREDENTIALS[:password]
+          )
+        end
+      end
+    end
   end
 end
