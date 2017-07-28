@@ -1,3 +1,10 @@
+PATH
+  remote: .
+  specs:
+    teachable_api (0.0.1)
+      faraday (~> 0.12)
+      faraday_middleware (~> 0.11)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -25,10 +32,9 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  faraday (~> 0.12.2)
-  faraday_middleware
   minitest (~> 5.10)
   rake (~> 12.0)
+  teachable_api!
   vcr
   webmock
 
