@@ -72,5 +72,30 @@ module Teachable
         end
       end
     end
+
+    # =================================================================
+    # User Refresh
+    # =================================================================
+    def test_can_refresh_authenticated_user
+      user = User.new USER_CREDENTIALS[:email]
+      
+      VCR.use_cassette('sign_in') do
+        user.authenticate! USER_CREDENTIALS[:password]
+      end
+
+      VCR.use_cassette('refresh') do
+        user.refresh!
+      end
+    end
+
+    def test_cannot_refresh_unauthenticated_user
+      user = User.new USER_CREDENTIALS[:email]
+      
+      VCR.use_cassette('refresh_without_auth') do
+        assert_raises AuthError do
+          user.refresh!
+        end
+      end
+    end
   end
 end
