@@ -7,6 +7,8 @@ module Teachable
       password: 'password'
     }.freeze
 
+    UNREGISTERED_EMAIL = 'sinclair_foo@bar.com'
+
     def test_user_can_init
       user = User.new USER_CREDENTIALS[:email]
       refute_nil user
@@ -54,7 +56,7 @@ module Teachable
     end
 
     def test_incorrect_email_raises_auth_error
-      user = User.new 'sinclair_foo@bar.com'
+      user = User.new UNREGISTERED_EMAIL
 
       VCR.use_cassette('sign_in_bad_email') do
         assert_raises Teachable::AuthError do
@@ -94,6 +96,49 @@ module Teachable
       VCR.use_cassette('refresh_without_auth') do
         assert_raises AuthError do
           user.refresh!
+        end
+      end
+    end
+    
+    # =================================================================
+    # Order Listing
+    # =================================================================
+    def test_can_list_orders
+      user = User.new USER_CREDENTIALS[:email]
+      
+      VCR.use_cassette('sign_in') do
+        user.authenticate! USER_CREDENTIALS[:password]
+      end
+
+      VCR.use_cassette('orders') do
+        orders = user.orders
+        assert orders.is_a? Array
+        assert_equal 2, orders.length
+
+        first_order = orders.first
+        assert_equal 482, first_order.id
+
+        second_order = orders.last
+        assert_equal 483, second_order.id
+      end
+    end
+
+    def test_cannot_list_orders_for_unauthenticated_user
+      user = User.new USER_CREDENTIALS[:email]
+      
+      VCR.use_cassette('orders_without_auth') do
+        assert_raises AuthError do
+          user.orders
+        end
+      end
+    end
+
+    def test_cannot_list_orders_for_unregistered_user
+      user = User.new UNREGISTERED_EMAIL
+      
+      VCR.use_cassette('orders_without_registration') do
+        assert_raises AuthError do
+          user.orders
         end
       end
     end

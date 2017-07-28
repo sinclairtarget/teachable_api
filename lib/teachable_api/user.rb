@@ -1,3 +1,5 @@
+require_relative 'order'
+
 # Represents a user or potential user of the mock Teachable API.
 module Teachable
   class User
@@ -37,6 +39,22 @@ module Teachable
       case resp.status
       when 200
         refresh_from_user_response resp
+      when 401
+        raise Teachable::AuthError, resp.body['error']
+      else
+        raise Teachable::Error, 'Unknown response.'
+      end
+    end
+
+    def orders
+      resp = API.connection.get 'api/orders', {
+        user_email: @email,
+        user_token: @token
+      }
+
+      case resp.status
+      when 200
+        resp.body.map { |order_hash| Order.new(order_hash) }
       when 401
         raise Teachable::AuthError, resp.body['error']
       else
