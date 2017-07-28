@@ -1,20 +1,26 @@
 require_relative 'order'
 require_relative 'util'
 
-# Represents a user or potential user of the mock Teachable API.
 module Teachable
+  # Represents a user or potential user of the mock Teachable API.
   class User
     include Util
     extend Util
 
     attr_reader :id, :token, :created_at, :updated_at
 
+    # Initializes a user identified by the given email.
+    #
+    # An initialized user starts off unauthenticated. You must call
+    # #authenticate! before making any method calls that require
+    # authentication.
     def initialize(email)
       raise_if_blank email, 'email'
       @email = email
       @token = nil
     end
     
+    # Authenticates the current user with the service, obtaining a user token.
     def authenticate!(password)
       raise_if_blank password, 'password'
       resp = API.connection.post 'users/sign_in', { 
@@ -34,6 +40,10 @@ module Teachable
       end
     end
 
+    # Asks the service for the latest information about this user. Updates the
+    # stored user token.
+    #
+    # Requires authentication.
     def refresh!
       resp = API.connection.get 'api/users/current_user/edit', {
         user_email: @email,
@@ -50,6 +60,12 @@ module Teachable
       end
     end
 
+    # Lists all the orders currently associated with this user.
+    #
+    # Requires authentication.
+    #
+    # NOTE: The results are not cached, so each call to this method will 
+    # involve a network request.
     def orders
       resp = API.connection.get 'api/orders', {
         user_email: @email,
@@ -66,6 +82,9 @@ module Teachable
       end
     end
 
+    # Creates an order associated with this user.
+    #
+    # Requires authentication.
     def add_order(total:, total_quantity:, special_instructions: nil)
       resp = API.connection.post 'api/orders', {
         order: {
@@ -95,6 +114,10 @@ module Teachable
       end
     end
 
+    # Destroys the given order so that it is no longer associated with this
+    # user.
+    #
+    # Requires authentication.
     def remove_order(order)
       resp = API.connection.delete "api/orders/#{order.id}", {
         user_email: @email,
@@ -113,6 +136,7 @@ module Teachable
       end
     end
 
+    # :nodoc:
     def refresh_from_user_response(resp)
       @id = resp.body['id']
       @token = resp.body['tokens']
@@ -121,6 +145,9 @@ module Teachable
       self
     end
 
+    # Registers a new user with the service.
+    #
+    # Returns a new user object that is already authenticated.
     def self.register(email:, password:, password_confirmation:)
       raise_if_blank email, 'email'
       raise_if_blank password, 'password'

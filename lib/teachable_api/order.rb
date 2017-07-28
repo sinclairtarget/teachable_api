@@ -4,6 +4,7 @@ module Teachable
     attr_reader :id, :number, :special_instructions, :total, :total_quantity,
       :created_at, :updated_at
 
+    # Initializes a new Order object using a string hash of order data.
     def initialize(order_hash)
       @id = order_hash['id']
       @number = order_hash['number']
