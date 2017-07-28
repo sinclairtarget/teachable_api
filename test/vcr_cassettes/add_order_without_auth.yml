@@ -1,0 +1,53 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://fast-bayou-75985.herokuapp.com/api/orders?user_email=sinclair_test_user@test.com&user_token
+    body:
+      encoding: UTF-8
+      string: '{"order":{"total":"3.0","total_quantity":3,"special_instructions":"foo
+        bar","email":"sinclair_test_user@test.com"}}'
+    headers:
+      Accept:
+      - application/json
+      User-Agent:
+      - Faraday v0.12.2
+      Content-Type:
+      - application/json
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 401
+      message: 'Unauthorized '
+    headers:
+      Connection:
+      - keep-alive
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      Content-Type:
+      - application/json; charset=utf-8
+      Cache-Control:
+      - no-cache
+      X-Request-Id:
+      - e82feec9-bba6-4d13-a6ce-b1ca48d9c2a0
+      X-Runtime:
+      - '0.015099'
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.2.4/2015-12-16)
+      Date:
+      - Fri, 28 Jul 2017 18:07:18 GMT
+      Content-Length:
+      - '61'
+      Via:
+      - 1.1 vegur
+    body:
+      encoding: UTF-8
+      string: '{"error":"You need to sign in or sign up before continuing."}'
+    http_version: 
+  recorded_at: Fri, 28 Jul 2017 18:07:18 GMT
+recorded_with: VCR 3.0.3

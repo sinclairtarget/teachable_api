@@ -144,6 +144,90 @@ module Teachable
     end
 
     # =================================================================
+    # Order Creation
+    # =================================================================
+    TEST_ORDER = {
+      total: '3.0',
+      total_quantity: 3,
+      special_instructions: 'foo bar'
+    }.freeze
+
+    def test_can_add_order
+      user = User.new USER_CREDENTIALS[:email]
+
+      VCR.use_cassette('sign_in') do
+        user.authenticate! USER_CREDENTIALS[:password]
+      end
+
+      VCR.use_cassette('add_order') do
+        order = user.add_order(**TEST_ORDER)
+
+        refute_nil order
+        assert_equal TEST_ORDER[:total], order.total
+        assert_equal TEST_ORDER[:total_quantity], order.total_quantity
+        assert_equal TEST_ORDER[:special_instructions], 
+          order.special_instructions
+      end
+    end
+
+    def test_cannot_add_order_for_unauthed_user
+      user = User.new USER_CREDENTIALS[:email]
+
+      VCR.use_cassette('add_order_without_auth') do
+        assert_raises AuthError do
+          user.add_order(**TEST_ORDER)
+        end
+      end
+    end
+
+    def test_can_add_order_without_special_instructions
+      user = User.new USER_CREDENTIALS[:email]
+
+      VCR.use_cassette('sign_in') do
+        user.authenticate! USER_CREDENTIALS[:password]
+      end
+
+      VCR.use_cassette('add_order_without_special_instructions') do
+        unspecial_order = TEST_ORDER.dup
+        unspecial_order.delete(:special_instructions)
+        order = user.add_order(unspecial_order)
+
+        refute_nil order
+        assert_equal TEST_ORDER[:total], order.total
+        assert_equal TEST_ORDER[:total_quantity], order.total_quantity
+        assert_nil order.special_instructions
+      end
+    end
+
+    def test_missing_total_raises_validation_error
+      user = User.new USER_CREDENTIALS[:email]
+
+      VCR.use_cassette('sign_in') do
+        user.authenticate! USER_CREDENTIALS[:password]
+      end
+
+      VCR.use_cassette('add_order_missing_total') do
+        assert_raises ValidationError do
+          user.add_order(**TEST_ORDER, total: nil)
+        end
+      end
+    end
+
+    def test_missing_total_quantity_raises_validation_error
+      user = User.new USER_CREDENTIALS[:email]
+
+      VCR.use_cassette('sign_in') do
+        user.authenticate! USER_CREDENTIALS[:password]
+      end
+
+      VCR.use_cassette('add_order_missing_total_quantity') do
+        assert_raises ValidationError do
+          user.add_order(**TEST_ORDER, total_quantity: nil)
+        end
+      end
+    end
+
+    # =================================================================
     # Registration
     # =================================================================
     def test_can_register_user

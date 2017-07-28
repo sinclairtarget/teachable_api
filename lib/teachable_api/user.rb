@@ -62,6 +62,35 @@ module Teachable
       end
     end
 
+    def add_order(total:, total_quantity:, special_instructions: nil)
+      resp = API.connection.post 'api/orders', {
+        order: {
+          total: total,
+          total_quantity: total_quantity,
+          special_instructions: special_instructions,
+          email: @email
+        }
+      } do |req|
+        req.params[:user_email] = @email
+        req.params[:user_token] = @token
+      end
+
+      case resp.status
+      when 200 # Why isn't this a 201?
+        Order.new resp.body
+      when 401
+        raise Teachable::AuthError, resp.body['error']
+      when 422
+        messages = resp.body['errors'].map do |error|
+          error['title']
+        end
+        message = messages.join(', ')
+        raise Teachable::ValidationError, message
+      else
+        raise Teachable::Error, 'Unknown response.'
+      end
+    end
+
     def refresh_from_user_response(resp)
       @id = resp.body['id']
       @token = resp.body['tokens']
